@@ -1,4 +1,5 @@
 const express = require("express");
+const pool = require("./config/database");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -16,6 +17,20 @@ app.get("/health", (req, res) => {
     res.json({
         status: "healthy"
     });
+});
+
+app.get("/db-health", async (req, res) => {
+    try {
+        await pool.query("SELECT 1");
+
+        res.json({
+            database: "connected"
+        });
+    } catch (error) {
+        res.status(500).json({
+            database: "disconnected"
+        });
+    }
 });
 
 app.listen(PORT, () => {
