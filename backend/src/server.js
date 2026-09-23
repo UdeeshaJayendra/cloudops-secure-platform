@@ -33,6 +33,14 @@ app.get("/db-health", async (req, res) => {
     }
 });
 
+app.get("/info", (req, res) => {
+    res.json({
+        project: "CloudOps Secure Platform",
+        environment: process.env.NODE_ENV || "development",
+        version: "1.0.0"
+    });
+});
+
 app.listen(PORT, () => {
     console.log(`Backend API running on port ${PORT}`);
 });
