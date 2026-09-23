@@ -41,6 +41,14 @@ app.get("/info", (req, res) => {
     });
 });
 
+app.get("/api/v1/status", (req, res) => {
+    res.json({
+        api: "CloudOps Secure Platform",
+        version: "v1",
+        status: "operational"
+    });
+});
+
 app.listen(PORT, () => {
     console.log(`Backend API running on port ${PORT}`);
 });
