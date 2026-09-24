@@ -250,19 +250,27 @@ app.use((req, res) => {
     });
 });
 
-const server = app.listen(PORT, () => {
-    console.log(`Backend API running on port ${PORT}`);
-});
+let server;
+
+if (require.main === module) {
+    server = app.listen(PORT, () => {
+        console.log(`Backend API running on port ${PORT}`);
+    });
+}
 
 const shutdown = async (signal) => {
     console.log(`${signal} received. Shutting down gracefully...`);
 
+    if (server) {
     server.close(async () => {
         await pool.end();
         console.log("Database connection closed.");
         process.exit(0);
     });
+    }
 };
 
 process.on("SIGTERM", () => shutdown("SIGTERM"));
 process.on("SIGINT", () => shutdown("SIGINT"));
+
+module.exports = app;
