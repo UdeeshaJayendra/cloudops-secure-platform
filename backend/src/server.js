@@ -1,6 +1,7 @@
 const express = require("express");
 const pool = require("./config/database");
 
+const validateRequiredFields = require("./middleware/validate");
 const app = express();
 const PORT = process.env.PORT || 3000;
 const NODE_ENV = process.env.NODE_ENV || "development";
@@ -92,6 +93,21 @@ app.get("/metadata", (req, res) => {
         architecture: process.arch
     });
 });
+app.post(
+    "/api/v1/config",
+    validateRequiredFields(["name", "value"]),
+    (req, res) => {
+        const { name, value } = req.body;
+
+        res.status(201).json({
+            message: "Configuration accepted",
+            configuration: {
+                name,
+                value
+            }
+        });
+    }
+);
 
 app.use((req, res) => {
     res.status(404).json({
