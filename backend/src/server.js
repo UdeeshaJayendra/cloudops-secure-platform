@@ -6,8 +6,20 @@ const validateRequiredFields = require("./middleware/validate");
 const app = express();
 const PORT = process.env.PORT || 3000;
 const NODE_ENV = process.env.NODE_ENV || "development";
+const helmet = require("helmet");
+const cors = require("cors");
 
 app.use(express.json());
+
+app.use(helmet());
+
+app.use(cors({
+    origin: process.env.CORS_ORIGIN || "*"
+}));
+
+app.use(express.json({
+    limit: "10kb"
+}));
 
 app.use((req, res, next) => {
     const start = Date.now();
