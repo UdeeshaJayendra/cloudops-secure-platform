@@ -68,6 +68,19 @@ app.use((req, res) => {
     });
 });
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     console.log(`Backend API running on port ${PORT}`);
 });
+
+const shutdown = async (signal) => {
+    console.log(`${signal} received. Shutting down gracefully...`);
+
+    server.close(async () => {
+        await pool.end();
+        console.log("Database connection closed.");
+        process.exit(0);
+    });
+};
+
+process.on("SIGTERM", () => shutdown("SIGTERM"));
+process.on("SIGINT", () => shutdown("SIGINT"));
