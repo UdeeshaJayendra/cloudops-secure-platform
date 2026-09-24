@@ -3,6 +3,7 @@ const pool = require("./config/database");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const NODE_ENV = process.env.NODE_ENV || "development";
 
 app.use(express.json());
 
@@ -49,7 +50,7 @@ app.get("/db-health", async (req, res) => {
 app.get("/info", (req, res) => {
     res.json({
         project: "CloudOps Secure Platform",
-        environment: process.env.NODE_ENV || "development",
+        environment: NODE_ENV,
         version: "1.0.0"
     });
 });
