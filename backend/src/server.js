@@ -108,6 +108,13 @@ app.post(
         });
     }
 );
+app.get("/api/v1/db/stats", (req, res) => {
+    res.json({
+        totalConnections: pool.totalCount,
+        idleConnections: pool.idleCount,
+        waitingRequests: pool.waitingCount
+    });
+});
 
 app.use((req, res) => {
     res.status(404).json({
