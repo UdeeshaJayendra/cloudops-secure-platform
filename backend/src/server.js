@@ -81,6 +81,18 @@ app.get("/api/v1/status", (req, res) => {
         status: "operational"
     });
 });
+
+app.get("/metadata", (req, res) => {
+    res.json({
+        service: "cloudops-backend",
+        version: "1.0.0",
+        environment: NODE_ENV,
+        runtime: "Node.js",
+        platform: process.platform,
+        architecture: process.arch
+    });
+});
+
 app.use((req, res) => {
     res.status(404).json({
         error: "Route not found",
