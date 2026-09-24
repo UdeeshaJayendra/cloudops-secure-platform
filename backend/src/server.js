@@ -155,6 +155,81 @@ app.get("/api/v1/tasks", async (req, res) => {
         });
     }
 });
+app.get("/api/v1/tasks/:id", async (req, res) => {
+    try {
+        const task = await taskService.getTaskById(req.params.id);
+
+        if (!task) {
+            return res.status(404).json({
+                error: "Task not found"
+            });
+        }
+
+        res.json(task);
+    } catch (error) {
+        console.error(error);
+
+        res.status(500).json({
+            error: "Failed to retrieve task"
+        });
+    }
+});
+
+app.put("/api/v1/tasks/:id", async (req, res) => {
+    try {
+        const { title, description, status } = req.body;
+
+        if (!title || !status) {
+            return res.status(400).json({
+                error: "Title and status are required"
+            });
+        }
+
+        const task = await taskService.updateTask(
+            req.params.id,
+            title,
+            description,
+            status
+        );
+
+        if (!task) {
+            return res.status(404).json({
+                error: "Task not found"
+            });
+        }
+
+        res.json(task);
+    } catch (error) {
+        console.error(error);
+
+        res.status(500).json({
+            error: "Failed to update task"
+        });
+    }
+});
+
+app.delete("/api/v1/tasks/:id", async (req, res) => {
+    try {
+        const task = await taskService.deleteTask(req.params.id);
+
+        if (!task) {
+            return res.status(404).json({
+                error: "Task not found"
+            });
+        }
+
+        res.json({
+            message: "Task deleted successfully",
+            task
+        });
+    } catch (error) {
+        console.error(error);
+
+        res.status(500).json({
+            error: "Failed to delete task"
+        });
+    }
+});
 
 app.use((req, res) => {
     res.status(404).json({
