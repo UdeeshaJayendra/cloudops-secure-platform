@@ -47,6 +47,25 @@ app.get("/db-health", async (req, res) => {
     }
 });
 
+app.get("/health/details", async (req, res) => {
+    let database = "disconnected";
+
+    try {
+        await pool.query("SELECT 1");
+        database = "connected";
+    } catch (error) {
+        database = "disconnected";
+    }
+
+    res.json({
+        status: "healthy",
+        service: "backend",
+        database,
+        environment: NODE_ENV,
+        uptime: `${Math.floor(process.uptime())} seconds`
+    });
+});
+
 app.get("/info", (req, res) => {
     res.json({
         project: "CloudOps Secure Platform",
