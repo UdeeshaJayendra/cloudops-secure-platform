@@ -48,6 +48,12 @@ app.get("/api/v1/status", (req, res) => {
         status: "operational"
     });
 });
+app.use((req, res) => {
+    res.status(404).json({
+        error: "Route not found",
+        path: req.originalUrl
+    });
+});
 
 app.listen(PORT, () => {
     console.log(`Backend API running on port ${PORT}`);
