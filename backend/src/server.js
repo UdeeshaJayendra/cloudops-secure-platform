@@ -1,5 +1,6 @@
 const express = require("express");
 const pool = require("./config/database");
+const taskService = require("./services/taskService");
 
 const validateRequiredFields = require("./middleware/validate");
 const app = express();
@@ -114,6 +115,45 @@ app.get("/api/v1/db/stats", (req, res) => {
         idleConnections: pool.idleCount,
         waitingRequests: pool.waitingCount
     });
+});
+
+app.post("/api/v1/tasks", async (req, res) => {
+    try {
+        const { title, description } = req.body;
+
+        if (!title) {
+            return res.status(400).json({
+                error: "Task title is required"
+            });
+        }
+
+        const task = await taskService.createTask(title, description);
+
+        res.status(201).json(task);
+    } catch (error) {
+        console.error(error);
+
+        res.status(500).json({
+            error: "Failed to create task"
+        });
+    }
+});
+
+app.get("/api/v1/tasks", async (req, res) => {
+    try {
+        const tasks = await taskService.getTasks();
+
+        res.json({
+            count: tasks.length,
+            tasks
+        });
+    } catch (error) {
+        console.error(error);
+
+        res.status(500).json({
+            error: "Failed to retrieve tasks"
+        });
+    }
 });
 
 app.use((req, res) => {
