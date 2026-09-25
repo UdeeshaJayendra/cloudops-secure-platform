@@ -8,10 +8,12 @@ const PORT = process.env.PORT || 3000;
 const NODE_ENV = process.env.NODE_ENV || "development";
 const helmet = require("helmet");
 const cors = require("cors");
+const taskRoutes = require("./routes/taskRoutes");
 
 app.use(express.json());
 
 app.use(helmet());
+app.use("/api/v1/tasks", taskRoutes);
 
 app.use(cors({
     origin: process.env.CORS_ORIGIN || "*"
