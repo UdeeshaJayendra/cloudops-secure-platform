@@ -26,6 +26,7 @@ services:
       POSTGRES_PASSWORD: cloudops
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U cloudops -d cloudops"]
       interval: 5s
