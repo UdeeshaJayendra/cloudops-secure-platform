@@ -17,6 +17,15 @@ services:
       postgres:
         condition: service_healthy
 
+  frontend:
+    build:
+      context: ./frontend
+    container_name: cloudops-frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+
   postgres:
     image: postgres:17-alpine
     container_name: cloudops-postgres
