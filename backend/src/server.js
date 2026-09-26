@@ -56,7 +56,7 @@ app.get("/db-health", async (req, res) => {
         res.json({
             database: "connected"
         });
-    } catch (error) {
+    } catch {
         res.status(500).json({
             database: "disconnected"
         });
@@ -69,8 +69,8 @@ app.get("/health/details", async (req, res) => {
     try {
         await pool.query("SELECT 1");
         database = "connected";
-    } catch (error) {
-        database = "disconnected";
+    } catch {
+        // Database connection failed
     }
 
     res.json({
