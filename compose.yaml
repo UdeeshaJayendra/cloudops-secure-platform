@@ -10,9 +10,9 @@ services:
       PORT: 3000
       DB_HOST: postgres
       DB_PORT: 5432
-      DB_NAME: cloudops
-      DB_USER: cloudops
-      DB_PASSWORD: cloudops
+      DB_NAME: ${POSTGRES_DB}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
     depends_on:
       postgres:
         condition: service_healthy
@@ -30,14 +30,14 @@ services:
     image: postgres:17-alpine
     container_name: cloudops-postgres
     environment:
-      POSTGRES_DB: cloudops
-      POSTGRES_USER: cloudops
-      POSTGRES_PASSWORD: cloudops
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./database/init:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U cloudops -d cloudops"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 5
