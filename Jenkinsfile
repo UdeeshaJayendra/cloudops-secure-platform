@@ -63,6 +63,13 @@ pipeline {
             }
         }
 
+        stage('AWS Check') {
+            steps {
+                bat 'aws --version'
+                bat 'aws sts get-caller-identity'
+            }
+        }
+
         stage('Docker Build') {
             steps {
                 bat 'docker compose build'
