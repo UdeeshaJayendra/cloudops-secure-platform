@@ -57,18 +57,18 @@ pipeline {
             }
         }
 
+        stage('Docker Check') {
+            steps {
+                bat 'docker version'
+            }
+        }
+
         stage('Docker Build') {
             steps {
                 bat 'docker compose build'
             }
         }
     }
-
-stage('Docker Check') {
-    steps {
-        bat 'docker version'
-    }
-}
 
     post {
         success {
