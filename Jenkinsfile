@@ -65,8 +65,13 @@ pipeline {
 
         stage('AWS Check') {
             steps {
-                bat 'aws --version'
-                bat 'aws sts get-caller-identity'
+                withCredentials([
+                    [$class: 'AmazonWebServicesCredentialsBinding',
+                     credentialsId: 'aws-terraform-admin']
+                ]) {
+                    bat 'aws --version'
+                    bat 'aws sts get-caller-identity'
+                }
             }
         }
 
