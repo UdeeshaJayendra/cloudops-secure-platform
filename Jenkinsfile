@@ -64,6 +64,12 @@ pipeline {
         }
     }
 
+stage('Docker Check') {
+    steps {
+        bat 'docker version'
+    }
+}
+
     post {
         success {
             echo 'CloudOps Secure Platform pipeline completed successfully.'
