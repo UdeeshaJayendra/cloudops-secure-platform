@@ -1,8 +1,11 @@
 services:
 
   backend:
+    image: cloudops-backend:latest
+
     build:
       context: ./backend
+
     container_name: cloudops-backend
 
     environment:
@@ -34,8 +37,11 @@ services:
 
 
   frontend:
+    image: cloudops-frontend:latest
+
     build:
       context: ./frontend
+
     container_name: cloudops-frontend
 
     ports:
@@ -59,6 +65,7 @@ services:
 
   postgres:
     image: postgres:17-alpine
+
     container_name: cloudops-postgres
 
     environment:

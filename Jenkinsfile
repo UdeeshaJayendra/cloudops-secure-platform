@@ -71,8 +71,9 @@ pipeline {
 
         stage('Trivy Scan') {
             steps {
-                bat '"%TRIVY_HOME%\\trivy.exe" image --timeout 20m --severity HIGH,CRITICAL --exit-code 1 --ignore-unfixed cloudops-backend'
-                bat '"%TRIVY_HOME%\\trivy.exe" image --timeout 20m --severity HIGH,CRITICAL --exit-code 1 --ignore-unfixed cloudops-frontend'
+                bat 'set TRIVY_CACHE_DIR=C:\\Jenkins\\trivy-cache && "%TRIVY_HOME%\\trivy.exe" image --cache-dir C:\\Jenkins\\trivy-cache --timeout 20m --severity HIGH,CRITICAL --exit-code 1 --ignore-unfixed cloudops-backend:latest'
+
+                bat 'set TRIVY_CACHE_DIR=C:\\Jenkins\\trivy-cache && "%TRIVY_HOME%\\trivy.exe" image --cache-dir C:\\Jenkins\\trivy-cache --timeout 20m --severity HIGH,CRITICAL --exit-code 1 --ignore-unfixed cloudops-frontend:latest'
             }
         }
     }
