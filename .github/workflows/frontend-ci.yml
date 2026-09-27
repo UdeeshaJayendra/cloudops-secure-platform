@@ -58,3 +58,25 @@ jobs:
 
       - name: Build frontend
         run: npm run build
+
+  docker-security:
+    runs-on: ubuntu-latest
+    needs:
+      - lint
+      - build
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build frontend Docker image
+        run: docker build -t cloudops-frontend:test ./frontend
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: cloudops-frontend:test
+          format: table
+          exit-code: 1
+          ignore-unfixed: true
+          severity: CRITICAL,HIGH
