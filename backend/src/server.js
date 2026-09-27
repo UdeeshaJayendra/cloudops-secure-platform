@@ -9,6 +9,7 @@ const NODE_ENV = process.env.NODE_ENV || "development";
 const helmet = require("helmet");
 const cors = require("cors");
 const taskRoutes = require("./routes/taskRoutes");
+const rateLimit = require("express-rate-limit");
 
 app.use(express.json());
 
@@ -22,6 +23,18 @@ app.use(cors({
         "http://127.0.0.1:8080"
     ]
 }));
+
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 100,
+    standardHeaders: "draft-7",
+    legacyHeaders: false,
+    message: {
+        error: "Too many requests, please try again later."
+    }
+});
+
+app.use("/api/", apiLimiter);
 
 app.use("/api/v1/tasks", taskRoutes);
 
