@@ -47,6 +47,55 @@ describe("Task API", () => {
         expect(response.body.error).toBe("Task title is required");
     });
 
+    test("POST /api/v1/tasks should reject non-string title", async () => {
+        const response = await request(app)
+            .post("/api/v1/tasks")
+            .send({
+                title: 123
+            });
+
+        expect(response.statusCode).toBe(400);
+        expect(response.body.error).toBe("Task title must be a string");
+    });
+
+    test("POST /api/v1/tasks should reject whitespace-only title", async () => {
+        const response = await request(app)
+            .post("/api/v1/tasks")
+            .send({
+                title: "   "
+            });
+
+        expect(response.statusCode).toBe(400);
+        expect(response.body.error).toBe("Task title cannot be empty");
+    });
+
+    test("POST /api/v1/tasks should reject title longer than 100 characters", async () => {
+        const response = await request(app)
+            .post("/api/v1/tasks")
+            .send({
+                title: "A".repeat(101)
+            });
+
+        expect(response.statusCode).toBe(400);
+        expect(response.body.error).toBe(
+            "Task title must not exceed 100 characters"
+        );
+    });
+
+    test("POST /api/v1/tasks should reject description longer than 500 characters", async () => {
+        const response = await request(app)
+            .post("/api/v1/tasks")
+            .send({
+                title: "Valid Task",
+                description: "A".repeat(501)
+            });
+
+        expect(response.statusCode).toBe(400);
+        expect(response.body.error).toBe(
+            "Task description must not exceed 500 characters"
+        );
+    });
+
     test("POST /api/v1/tasks should reject invalid status", async () => {
         const response = await request(app)
             .post("/api/v1/tasks")

@@ -32,3 +32,18 @@ describe("Health API", () => {
         expect(response.body.error).toBe("Route not found");
     });
 });
+
+describe("Rate Limiting", () => {
+    test("API should return 429 after exceeding request limit", async () => {
+        for (let i = 0; i < 100; i++) {
+            await request(app).get("/api/v1/tasks");
+        }
+
+        const response = await request(app).get("/api/v1/tasks");
+
+        expect(response.statusCode).toBe(429);
+        expect(response.body.error).toBe(
+            "Too many requests, please try again later."
+        );
+    });
+});
