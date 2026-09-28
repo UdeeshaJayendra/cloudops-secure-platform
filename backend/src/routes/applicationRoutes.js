@@ -89,7 +89,8 @@ router.post("/:id/deploy", async (req, res) => {
                         ? "cloudops-backend"
                         : "cloudops-frontend",
                     version,
-                    environment
+                    environment,
+                    deploymentId: deployment.id
                 });
 
             return res.status(201).json({

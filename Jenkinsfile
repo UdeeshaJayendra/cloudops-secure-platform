@@ -19,6 +19,12 @@ pipeline {
             choices: ['Kubernetes'],
             description: 'Deployment environment'
         )
+
+        string(
+            name: 'DEPLOYMENT_ID',
+            defaultValue: '',
+            description: 'Database deployment ID'
+        )
     }
 
     environment {
@@ -41,9 +47,18 @@ pipeline {
                         error('VERSION must contain numbers only.')
                     }
 
+                    if (!params.DEPLOYMENT_ID?.trim()) {
+                        error('DEPLOYMENT_ID is required.')
+                    }
+
+                    if (!(params.DEPLOYMENT_ID ==~ /^[0-9]+$/)) {
+                        error('DEPLOYMENT_ID must contain numbers only.')
+                    }
+
                     echo "Application: ${params.APPLICATION}"
                     echo "Version: ${params.VERSION}"
                     echo "Environment: ${params.ENVIRONMENT}"
+                    echo "Deployment ID: ${params.DEPLOYMENT_ID}"
                 }
             }
         }

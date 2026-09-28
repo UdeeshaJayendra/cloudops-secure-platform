@@ -16,7 +16,8 @@ const auth = {
 const triggerDeployment = async ({
     application,
     version,
-    environment
+    environment,
+    deploymentId
 }) => {
     if (!JENKINS_USER || !JENKINS_TOKEN) {
         throw new Error("Jenkins credentials are not configured");
@@ -37,7 +38,8 @@ const triggerDeployment = async ({
     const params = new URLSearchParams({
         APPLICATION: application,
         VERSION: version,
-        ENVIRONMENT: environment
+        ENVIRONMENT: environment,
+        DEPLOYMENT_ID: String(deploymentId)
     });
 
     const response = await axios.post(
