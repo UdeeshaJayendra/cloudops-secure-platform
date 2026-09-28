@@ -18,6 +18,7 @@ const deploymentRoutes = require("./routes/deploymentRoutes");
 app.use(express.json());
 
 app.use(helmet());
+app.use(cors());
 
 app.use("/api/v1/applications", applicationRoutes);
 app.use("/api/v1/deployments", deploymentRoutes);
