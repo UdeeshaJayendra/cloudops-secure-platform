@@ -97,9 +97,99 @@ await client.query(
     }
 };
 
+const markDeploymentSuccessful = async (
+    deploymentId,
+    version
+) => {
+    const client = await pool.connect();
+
+    try {
+        await client.query("BEGIN");
+
+        const deploymentResult = await client.query(
+            `UPDATE deployments
+             SET
+                 status = 'successful',
+                 deployed_at = CURRENT_TIMESTAMP
+             WHERE id = $1
+             RETURNING *`,
+            [deploymentId]
+        );
+
+        if (deploymentResult.rowCount === 0) {
+            await client.query("ROLLBACK");
+            return null;
+        }
+
+        await client.query(
+            `UPDATE applications
+             SET
+                 current_version = $1,
+                 desired_version = NULL,
+                 status = 'running',
+                 updated_at = CURRENT_TIMESTAMP
+             WHERE id = $2`,
+            [
+                version,
+                deploymentResult.rows[0].application_id
+            ]
+        );
+
+        await client.query("COMMIT");
+
+        return deploymentResult.rows[0];
+    } catch (error) {
+        await client.query("ROLLBACK");
+        throw error;
+    } finally {
+        client.release();
+    }
+};
+
+const markDeploymentFailed = async (deploymentId) => {
+    const client = await pool.connect();
+
+    try {
+        await client.query("BEGIN");
+
+        const deploymentResult = await client.query(
+            `UPDATE deployments
+             SET status = 'failed'
+             WHERE id = $1
+             RETURNING *`,
+            [deploymentId]
+        );
+
+        if (deploymentResult.rowCount === 0) {
+            await client.query("ROLLBACK");
+            return null;
+        }
+
+        await client.query(
+            `UPDATE applications
+             SET
+                 status = 'failed',
+                 updated_at = CURRENT_TIMESTAMP
+             WHERE id = $1`,
+            [deploymentResult.rows[0].application_id]
+        );
+
+        await client.query("COMMIT");
+
+        return deploymentResult.rows[0];
+    } catch (error) {
+        await client.query("ROLLBACK");
+        throw error;
+    } finally {
+        client.release();
+    }
+};
+
 module.exports = {
     getApplications,
     getApplicationById,
     getDeployments,
-    createDeployment
+    createDeployment,
+    markDeploymentSuccessful,
+    markDeploymentFailed
 };

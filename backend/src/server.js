@@ -6,27 +6,21 @@ const validateRequiredFields = require("./middleware/validate");
 const app = express();
 const PORT = process.env.PORT || 3000;
 const NODE_ENV = process.env.NODE_ENV || "development";
+
 const helmet = require("helmet");
 const cors = require("cors");
-const taskRoutes = require("./routes/taskRoutes");
-
 const rateLimit = require("express-rate-limit");
+
+const taskRoutes = require("./routes/taskRoutes");
 const applicationRoutes = require("./routes/applicationRoutes");
+const deploymentRoutes = require("./routes/deploymentRoutes");
 
 app.use(express.json());
 
 app.use(helmet());
 
 app.use("/api/v1/applications", applicationRoutes);
-
-app.use(cors({
-    origin: [
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "http://localhost:8080",
-        "http://127.0.0.1:8080"
-    ]
-}));
+app.use("/api/v1/deployments", deploymentRoutes);
 
 const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
