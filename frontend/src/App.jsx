@@ -179,7 +179,7 @@ function App() {
         <div className="app">
             <header className="topbar">
                 <div>
-                    <h1>CloudOps</h1>
+                    <h1 className="brand-title">CloudOps</h1>
                     <span>Operations Portal</span>
                 </div>
 

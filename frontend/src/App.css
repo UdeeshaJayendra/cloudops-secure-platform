@@ -23,6 +23,9 @@
   font-size: 21px;
   font-weight: 700;
 }
+.brand-title {
+  color: #2563eb;
+}
 
 .topbar span {
   color: #6b7280;
