@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cloudops-backend-config
+  namespace: cloudops
+data:
+  PORT: "3000"
+  DB_HOST: "cloudops-postgres"
+  DB_PORT: "5432"
+  DB_NAME: "cloudops"

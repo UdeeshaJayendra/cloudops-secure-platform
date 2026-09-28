@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudops-postgres
+  namespace: cloudops
+  labels:
+    app: cloudops-postgres
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: cloudops-postgres
+
+  template:
+    metadata:
+      labels:
+        app: cloudops-postgres
+
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:17-alpine
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - containerPort: 5432
+
+          env:
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: cloudops-postgres-secret
+                  key: POSTGRES_DB
+
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: cloudops-postgres-secret
+                  key: POSTGRES_USER
+
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cloudops-postgres-secret
+                  key: POSTGRES_PASSWORD
+
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+
+          securityContext:
+            allowPrivilegeEscalation: false
+
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+            initialDelaySeconds: 10
+            periodSeconds: 10
+
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+            initialDelaySeconds: 30
+            periodSeconds: 20
+
+      volumes:
+        - name: postgres-data
+          persistentVolumeClaim:
+            claimName: cloudops-postgres-pvc
