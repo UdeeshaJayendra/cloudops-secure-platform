@@ -8,6 +8,11 @@ const JENKINS_TOKEN = process.env.JENKINS_TOKEN;
 
 const JOB_NAME = "cloudops-secure-platform";
 
+const auth = {
+    username: JENKINS_USER,
+    password: JENKINS_TOKEN
+};
+
 const triggerDeployment = async ({
     application,
     version,
@@ -16,6 +21,18 @@ const triggerDeployment = async ({
     if (!JENKINS_USER || !JENKINS_TOKEN) {
         throw new Error("Jenkins credentials are not configured");
     }
+
+    const crumbResponse = await axios.get(
+        `${JENKINS_URL}/crumbIssuer/api/json`,
+        {
+            auth
+        }
+    );
+
+    const {
+        crumbRequestField,
+        crumb
+    } = crumbResponse.data;
 
     const params = new URLSearchParams({
         APPLICATION: application,
@@ -27,9 +44,9 @@ const triggerDeployment = async ({
         `${JENKINS_URL}/job/${JOB_NAME}/buildWithParameters?${params.toString()}`,
         {},
         {
-            auth: {
-                username: JENKINS_USER,
-                password: JENKINS_TOKEN
+            auth,
+            headers: {
+                [crumbRequestField]: crumb
             },
             validateStatus: (status) =>
                 status >= 200 && status < 400
