@@ -14,6 +14,7 @@ const rateLimit = require("express-rate-limit");
 const taskRoutes = require("./routes/taskRoutes");
 const applicationRoutes = require("./routes/applicationRoutes");
 const deploymentRoutes = require("./routes/deploymentRoutes");
+const client = require("@prometheus-io/client");
 
 app.use(express.json());
 
@@ -22,6 +23,31 @@ app.use(cors());
 
 app.use("/api/v1/applications", applicationRoutes);
 app.use("/api/v1/deployments", deploymentRoutes);
+
+client.collectDefaultMetrics();
+
+const httpRequestCounter = new client.Counter({
+    name: "cloudops_http_requests_total",
+    help: "Total number of HTTP requests",
+    labelNames: ["method", "route", "status_code"]
+});
+
+app.use((req, res, next) => {
+    res.on("finish", () => {
+        httpRequestCounter.inc({
+            method: req.method,
+            route: req.route?.path || req.path,
+            status_code: res.statusCode
+        });
+    });
+
+    next();
+});
+
+app.get("/metrics", async (req, res) => {
+    res.set("Content-Type", client.register.contentType);
+    res.end(await client.register.metrics());
+});
 
 const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
