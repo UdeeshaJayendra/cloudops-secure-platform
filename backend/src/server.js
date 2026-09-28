@@ -9,12 +9,14 @@ const NODE_ENV = process.env.NODE_ENV || "development";
 const helmet = require("helmet");
 const cors = require("cors");
 const taskRoutes = require("./routes/taskRoutes");
+
 const rateLimit = require("express-rate-limit");
 const applicationRoutes = require("./routes/applicationRoutes");
 
 app.use(express.json());
 
 app.use(helmet());
+
 app.use("/api/v1/applications", applicationRoutes);
 
 app.use(cors({
@@ -39,6 +41,7 @@ const apiLimiter = rateLimit({
 app.use("/api/", apiLimiter);
 
 app.use("/api/v1/tasks", taskRoutes);
+app.use("/api/v1/applications", applicationRoutes);
 
 app.use(express.json({
     limit: "10kb"
