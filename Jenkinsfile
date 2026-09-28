@@ -158,6 +158,32 @@ pipeline {
                 bat 'docker push %ECR_REGISTRY%/%FRONTEND_IMAGE%:%VERSION%'
             }
         }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                script {
+                    def imageName = params.APPLICATION == 'cloudops-backend'
+                        ? env.BACKEND_IMAGE
+                        : env.FRONTEND_IMAGE
+
+                    def deploymentName = params.APPLICATION == 'cloudops-backend'
+                        ? 'cloudops-backend'
+                        : 'cloudops-frontend'
+
+                    def containerName = params.APPLICATION == 'cloudops-backend'
+                        ? 'backend'
+                        : 'frontend'
+
+                    withEnv([
+                        'KUBECONFIG=C:\\ProgramData\\Jenkins\\.kube\\config'
+                    ]) {
+                        bat "kubectl set image deployment/${deploymentName} ${containerName}=%ECR_REGISTRY%/${imageName}:${params.VERSION} -n cloudops"
+
+                        bat "kubectl rollout status deployment/${deploymentName} -n cloudops --timeout=5m"
+                    }
+                }
+            }
+        }
     }
 
     post {
