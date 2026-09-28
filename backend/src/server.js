@@ -10,10 +10,12 @@ const helmet = require("helmet");
 const cors = require("cors");
 const taskRoutes = require("./routes/taskRoutes");
 const rateLimit = require("express-rate-limit");
+const applicationRoutes = require("./routes/applicationRoutes");
 
 app.use(express.json());
 
 app.use(helmet());
+app.use("/api/v1/applications", applicationRoutes);
 
 app.use(cors({
     origin: [

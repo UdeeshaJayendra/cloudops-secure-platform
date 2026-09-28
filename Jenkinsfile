@@ -1,6 +1,26 @@
 pipeline {
     agent any
 
+    parameters {
+        choice(
+            name: 'APPLICATION',
+            choices: ['cloudops-backend', 'cloudops-frontend'],
+            description: 'Application to deploy'
+        )
+
+        string(
+            name: 'VERSION',
+            defaultValue: '',
+            description: 'Application version to deploy'
+        )
+
+        choice(
+            name: 'ENVIRONMENT',
+            choices: ['Kubernetes'],
+            description: 'Deployment environment'
+        )
+    }
+
     environment {
         AWS_REGION = 'ap-south-1'
         ECR_REGISTRY = '216453078762.dkr.ecr.ap-south-1.amazonaws.com'
@@ -9,6 +29,24 @@ pipeline {
     }
 
     stages {
+
+        stage('Validate Parameters') {
+            steps {
+                script {
+                    if (!params.VERSION?.trim()) {
+                        error('VERSION is required.')
+                    }
+
+                    if (!(params.VERSION ==~ /^[0-9]+$/)) {
+                        error('VERSION must contain numbers only.')
+                    }
+
+                    echo "Application: ${params.APPLICATION}"
+                    echo "Version: ${params.VERSION}"
+                    echo "Environment: ${params.ENVIRONMENT}"
+                }
+            }
+        }
 
         stage('Checkout') {
             steps {
@@ -109,26 +147,26 @@ pipeline {
 
         stage('Tag Images') {
             steps {
-                bat 'docker tag %BACKEND_IMAGE%:latest %ECR_REGISTRY%/%BACKEND_IMAGE%:%BUILD_NUMBER%'
-                bat 'docker tag %FRONTEND_IMAGE%:latest %ECR_REGISTRY%/%FRONTEND_IMAGE%:%BUILD_NUMBER%'
+                bat 'docker tag %BACKEND_IMAGE%:latest %ECR_REGISTRY%/%BACKEND_IMAGE%:%VERSION%'
+                bat 'docker tag %FRONTEND_IMAGE%:latest %ECR_REGISTRY%/%FRONTEND_IMAGE%:%VERSION%'
             }
         }
 
         stage('Push Images to ECR') {
             steps {
-                bat 'docker push %ECR_REGISTRY%/%BACKEND_IMAGE%:%BUILD_NUMBER%'
-                bat 'docker push %ECR_REGISTRY%/%FRONTEND_IMAGE%:%BUILD_NUMBER%'
+                bat 'docker push %ECR_REGISTRY%/%BACKEND_IMAGE%:%VERSION%'
+                bat 'docker push %ECR_REGISTRY%/%FRONTEND_IMAGE%:%VERSION%'
             }
         }
     }
 
     post {
         success {
-            echo 'CloudOps Secure Platform pipeline completed successfully.'
+            echo "CloudOps deployment pipeline completed successfully for ${params.APPLICATION}:${params.VERSION}."
         }
 
         failure {
-            echo 'CloudOps Secure Platform pipeline failed.'
+            echo 'CloudOps deployment pipeline failed.'
         }
     }
 }
