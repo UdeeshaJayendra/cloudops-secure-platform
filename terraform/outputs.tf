@@ -18,3 +18,18 @@ output "private_subnet_ids" {
     aws_subnet.private_b.id
   ]
 }
+
+output "eks_cluster_name" {
+  description = "CloudOps EKS cluster name"
+  value       = aws_eks_cluster.cloudops.name
+}
+
+output "eks_cluster_endpoint" {
+  description = "CloudOps EKS API endpoint"
+  value       = aws_eks_cluster.cloudops.endpoint
+}
+
+output "eks_node_group_name" {
+  description = "CloudOps EKS node group name"
+  value       = aws_eks_node_group.cloudops.node_group_name
+}
