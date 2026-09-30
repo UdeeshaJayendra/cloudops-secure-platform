@@ -54,6 +54,10 @@ spec:
             - name: postgres-data
               mountPath: /var/lib/postgresql/data
 
+            - name: postgres-init
+              mountPath: /docker-entrypoint-initdb.d/01-schema.sql
+              subPath: 01-schema.sql
+
           resources:
             requests:
               cpu: "100m"
@@ -88,3 +92,7 @@ spec:
         - name: postgres-data
           persistentVolumeClaim:
             claimName: cloudops-postgres-pvc
+
+        - name: postgres-init
+          configMap:
+            name: cloudops-postgres-init
