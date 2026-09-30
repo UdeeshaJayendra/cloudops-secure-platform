@@ -227,7 +227,12 @@ pipeline {
 
                     withCredentials([
                         [$class: 'AmazonWebServicesCredentialsBinding',
-                         credentialsId: 'aws-terraform-admin']
+                         credentialsId: 'aws-terraform-admin'],
+
+                        string(
+                            credentialsId: 'deployment-callback-token',
+                            variable: 'DEPLOYMENT_CALLBACK_TOKEN'
+                        )
                     ]) {
 
                         try {
@@ -245,7 +250,7 @@ pipeline {
                             echo "Sending deployment failure callback..."
 
                             bat """
-                                kubectl exec -n cloudops deployment/cloudops-backend -- node -e "const http=require('http');const token=process.env.DEPLOYMENT_CALLBACK_TOKEN;const data=JSON.stringify({status:'failed'});const req=http.request({hostname:'127.0.0.1',port:3000,path:'/api/v1/deployments/${params.DEPLOYMENT_ID}/status',method:'POST',headers:{'Content-Type':'application/json','x-deployment-token':token,'Content-Length':Buffer.byteLength(data)}},r=>{let d='';r.on('data',c=>d+=c);r.on('end',()=>{console.log('Callback status:',r.statusCode);console.log(d)})});req.on('error',e=>console.error(e));req.write(data);req.end();"
+                                kubectl exec -n cloudops deployment/cloudops-backend -- env DEPLOYMENT_CALLBACK_TOKEN="%DEPLOYMENT_CALLBACK_TOKEN%" node -e "const http=require('http');const token=process.env.DEPLOYMENT_CALLBACK_TOKEN;const data=JSON.stringify({status:'failed'});const req=http.request({hostname:'127.0.0.1',port:3000,path:'/api/v1/deployments/${params.DEPLOYMENT_ID}/status',method:'POST',headers:{'Content-Type':'application/json','x-deployment-token':token,'Content-Length':Buffer.byteLength(data)}},r=>{let d='';r.on('data',c=>d+=c);r.on('end',()=>{console.log('Callback status:',r.statusCode);console.log(d)})});req.on('error',e=>console.error(e));req.write(data);req.end();"
                             """
 
                             echo "Deployment failure callback sent."
@@ -256,7 +261,7 @@ pipeline {
                         echo "Sending deployment success callback..."
 
                         bat """
-                            kubectl exec -n cloudops deployment/cloudops-backend -- node -e "const http=require('http');const token=process.env.DEPLOYMENT_CALLBACK_TOKEN;const data=JSON.stringify({status:'successful',version:'${params.VERSION}'});const req=http.request({hostname:'127.0.0.1',port:3000,path:'/api/v1/deployments/${params.DEPLOYMENT_ID}/status',method:'POST',headers:{'Content-Type':'application/json','x-deployment-token':token,'Content-Length':Buffer.byteLength(data)}},r=>{let d='';r.on('data',c=>d+=c);r.on('end',()=>{console.log('Callback status:',r.statusCode);console.log(d);if(r.statusCode!==200)process.exit(1)})});req.on('error',e=>{console.error(e);process.exit(1)});req.write(data);req.end();"
+                            kubectl exec -n cloudops deployment/cloudops-backend -- env DEPLOYMENT_CALLBACK_TOKEN="%DEPLOYMENT_CALLBACK_TOKEN%" node -e "const http=require('http');const token=process.env.DEPLOYMENT_CALLBACK_TOKEN;const data=JSON.stringify({status:'successful',version:'${params.VERSION}'});const req=http.request({hostname:'127.0.0.1',port:3000,path:'/api/v1/deployments/${params.DEPLOYMENT_ID}/status',method:'POST',headers:{'Content-Type':'application/json','x-deployment-token':token,'Content-Length':Buffer.byteLength(data)}},r=>{let d='';r.on('data',c=>d+=c);r.on('end',()=>{console.log('Callback status:',r.statusCode);console.log(d);if(r.statusCode!==200)process.exit(1)})});req.on('error',e=>{console.error(e);process.exit(1)});req.write(data);req.end();"
                         """
 
                         echo "Deployment success callback completed."
