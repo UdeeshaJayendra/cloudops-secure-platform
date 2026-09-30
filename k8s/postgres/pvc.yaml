@@ -4,6 +4,7 @@ metadata:
   name: cloudops-postgres-pvc
   namespace: cloudops
 spec:
+  storageClassName: gp2
   accessModes:
     - ReadWriteOnce
   resources:
