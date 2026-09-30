@@ -236,6 +236,37 @@ pipeline {
                     ]) {
 
                         try {
+
+                            /*
+                             * Synchronize the Jenkins callback token
+                             * with the Kubernetes backend secret.
+                             */
+                            echo "Synchronizing deployment callback authentication..."
+
+                            bat '''
+                                kubectl create secret generic cloudops-backend-secret ^
+                                  --from-literal=DB_USER=cloudops_app ^
+                                  --from-literal=DB_PASSWORD=cloudops_app_dev_password ^
+                                  --from-literal=DEPLOYMENT_CALLBACK_TOKEN="%DEPLOYMENT_CALLBACK_TOKEN%" ^
+                                  --dry-run=client -o yaml ^
+                                  | kubectl apply -f -
+                            '''
+
+                            /*
+                             * Restart backend so it loads the updated secret.
+                             */
+                            echo "Restarting backend to load callback authentication..."
+
+                            bat '''
+                                kubectl rollout restart deployment/cloudops-backend -n cloudops
+                                kubectl rollout status deployment/cloudops-backend -n cloudops --timeout=5m
+                            '''
+
+                            echo "Backend authentication configuration updated."
+
+                            /*
+                             * Deploy selected application.
+                             */
                             echo "Deploying ${imageName}:${params.VERSION} to AWS EKS..."
 
                             bat "kubectl set image deployment/${deploymentName} ${containerName}=%ECR_REGISTRY%/${imageName}:${params.VERSION} -n cloudops"
@@ -258,6 +289,10 @@ pipeline {
                             throw err
                         }
 
+                        /*
+                         * Deployment succeeded.
+                         * Notify backend and update deployment record.
+                         */
                         echo "Sending deployment success callback..."
 
                         bat """
