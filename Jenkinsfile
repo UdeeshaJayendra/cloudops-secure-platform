@@ -16,7 +16,7 @@ pipeline {
 
         choice(
             name: 'ENVIRONMENT',
-            choices: ['Kubernetes'],
+            choices: ['AWS EKS'],
             description: 'Deployment environment'
         )
 
@@ -29,9 +29,13 @@ pipeline {
 
     environment {
         AWS_REGION = 'ap-south-1'
+        EKS_CLUSTER_NAME = 'cloudops-secure-platform-eks'
         ECR_REGISTRY = '216453078762.dkr.ecr.ap-south-1.amazonaws.com'
+
         BACKEND_IMAGE = 'cloudops-backend'
         FRONTEND_IMAGE = 'cloudops-frontend'
+
+        KUBECONFIG = 'C:\\ProgramData\\Jenkins\\.kube\\config'
     }
 
     stages {
@@ -174,7 +178,39 @@ pipeline {
             }
         }
 
-        stage('Deploy to Kubernetes') {
+        stage('Configure AWS EKS') {
+            steps {
+                withCredentials([
+                    [$class: 'AmazonWebServicesCredentialsBinding',
+                     credentialsId: 'aws-terraform-admin']
+                ]) {
+                    bat '''
+                        if not exist "C:\\ProgramData\\Jenkins\\.kube" mkdir "C:\\ProgramData\\Jenkins\\.kube"
+
+                        aws eks update-kubeconfig ^
+                          --region %AWS_REGION% ^
+                          --name %EKS_CLUSTER_NAME% ^
+                          --kubeconfig "%KUBECONFIG%"
+
+                        kubectl config current-context
+                    '''
+                }
+            }
+        }
+
+        stage('Verify EKS') {
+            steps {
+                withCredentials([
+                    [$class: 'AmazonWebServicesCredentialsBinding',
+                     credentialsId: 'aws-terraform-admin']
+                ]) {
+                    bat 'kubectl get nodes -o wide'
+                    bat 'kubectl get namespace cloudops'
+                }
+            }
+        }
+
+        stage('Deploy to EKS') {
             steps {
                 script {
                     def imageName = params.APPLICATION == 'cloudops-backend'
@@ -189,22 +225,23 @@ pipeline {
                         ? 'backend'
                         : 'frontend'
 
-                    withEnv([
-                        'KUBECONFIG=C:\\ProgramData\\Jenkins\\.kube\\config'
+                    withCredentials([
+                        [$class: 'AmazonWebServicesCredentialsBinding',
+                         credentialsId: 'aws-terraform-admin']
                     ]) {
 
                         try {
-                            echo "Deploying ${imageName}:${params.VERSION} to Kubernetes..."
+                            echo "Deploying ${imageName}:${params.VERSION} to AWS EKS..."
 
                             bat "kubectl set image deployment/${deploymentName} ${containerName}=%ECR_REGISTRY%/${imageName}:${params.VERSION} -n cloudops"
 
                             bat "kubectl rollout status deployment/${deploymentName} -n cloudops --timeout=5m"
 
-                            echo "Kubernetes rollout completed successfully."
+                            echo "AWS EKS rollout completed successfully."
 
                         } catch (err) {
 
-                            echo "Kubernetes deployment failed."
+                            echo "AWS EKS deployment failed."
                             echo "Sending deployment failure callback..."
 
                             bat """
@@ -231,7 +268,7 @@ pipeline {
 
     post {
         success {
-            echo "CloudOps deployment pipeline completed successfully for ${params.APPLICATION}:${params.VERSION}."
+            echo "CloudOps deployment pipeline completed successfully for ${params.APPLICATION}:${params.VERSION} on AWS EKS."
         }
 
         failure {
