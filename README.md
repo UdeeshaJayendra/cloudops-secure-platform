@@ -93,6 +93,7 @@ This provides an end-to-end deployment workflow from source code to a running Ku
 
 # Deployment Demo
 
+https://github.com/user-attachments/assets/c14ae008-ad57-45d4-b721-9f29405a25b4
 
 The recording demonstrates the complete deployment workflow:
 
