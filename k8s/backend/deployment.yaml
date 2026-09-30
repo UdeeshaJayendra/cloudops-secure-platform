@@ -5,8 +5,12 @@ metadata:
   namespace: cloudops
   labels:
     app: cloudops-backend
+
 spec:
   replicas: 1
+
+  strategy:
+    type: Recreate
 
   selector:
     matchLabels:
@@ -41,14 +45,14 @@ spec:
               memory: "512Mi"
 
           securityContext:
-              runAsUser: 1000
-              runAsGroup: 1000
-              runAsNonRoot: true
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              capabilities:
-               drop:
-                 - ALL
+            runAsUser: 1000
+            runAsGroup: 1000
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
 
           volumeMounts:
             - name: tmp
