@@ -541,8 +541,6 @@ The final deployment was verified with the CloudOps Backend running as version *
 ---
 
 ---
-
-The frontend is exposed through an AWS Load Balancer while the backend and PostgreSQL services remain internal.
 ---
 
 # Author
