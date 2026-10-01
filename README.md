@@ -7,7 +7,6 @@ The platform provides a web interface where a user can select an application ver
 ---
 
 ## Project Overview
-
 CloudOps Secure Platform was developed to demonstrate how modern DevSecOps practices can be integrated into a cloud-native application.
 
 The project combines:
@@ -34,57 +33,10 @@ The main objective is to create a complete and reproducible pipeline where appli
 
 ## Architecture
 
-The high-level architecture follows this flow:
+<img width="1536" height="1024" alt="k" src="https://github.com/user-attachments/assets/f8451736-4690-48c3-9e8c-da28006a8909" />
 
-u
-u
-u
-u
 
----
-
-## Deployment Flow
-
-The main automated deployment process is:
-
-```text
-User
-  │
-  ▼
-CloudOps Frontend
-  │
-  ▼
-Backend API
-  │
-  ▼
-Create Deployment Record
-  │
-  ▼
-Jenkins Pipeline
-  │
-  ├── Checkout Source
-  ├── Install Dependencies
-  ├── Lint
-  ├── Unit Tests
-  ├── Build
-  ├── Trivy Scan
-  ├── Docker Image Build
-  └── Push Image to Amazon ECR
-              │
-              ▼
-        Amazon ECR
-              │
-              ▼
-         Amazon EKS
-              │
-              ▼
-       Kubernetes Rollout
-              │
-              ▼
-      Deployment Callback
-              │
-              ▼
-        CloudOps UI
+```
 ```
 
 This provides an end-to-end deployment workflow from source code to a running Kubernetes application.
@@ -202,7 +154,6 @@ The frontend is served through Nginx and exposed through an AWS Load Balancer.
 ## 1. Source Code
 
 The project source code is maintained in GitHub.
-
 Development changes are tracked using Git commits and branches.
 
 ---
@@ -210,7 +161,6 @@ Development changes are tracked using Git commits and branches.
 ## 2. Continuous Integration
 
 GitHub Actions performs automated CI workflows.
-
 The workflows validate application code before deployment.
 
 The CI process includes:
