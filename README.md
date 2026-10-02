@@ -489,8 +489,6 @@ The completed platform successfully demonstrates:
 The final deployment was verified with the CloudOps Backend running as version **13** on Amazon EKS.
 
 ---
-
----
 ---
 
 # Author
